@@ -1,0 +1,12 @@
+{
+  "name": "mon-vieux-grimoire-backend",
+  "version": "0.1.0",
+  "description": "backend du site Mon Vieux Grimoire",
+  "license": "ISC",
+  "author": "Julian Ritou",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

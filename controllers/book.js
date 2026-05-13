@@ -8,9 +8,7 @@ exports.getAllBooks = (req, res, next) => {
         }
     ).catch(
         (error) => {
-            res.status(400).json({
-            error: error
-            });
+            res.status(400).json({ error });
         }
     );
 };
@@ -40,9 +38,7 @@ exports.getOneBook = (req, res, next) => {
         }
     ).catch(
         (error) => {
-        res.status(404).json({
-            error: error
-        });
+        res.status(404).json({ error});
         }
     );
 };

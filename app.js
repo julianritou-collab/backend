@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const userRoutes = require('./routes/user');
 const bookRoutes = require('./routes/book');
+const errorHandler = require('./middleware/error-handler');
 
 dotenv.config();
 
@@ -25,5 +26,8 @@ app.use((req, res, next) => {
 app.use('/api/auth', userRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/images', express.static(path.join(__dirname, 'images')));
+
+// Middleware de gestion des erreurs
+app.use(errorHandler);
 
 module.exports = app;

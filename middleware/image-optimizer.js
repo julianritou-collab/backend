@@ -11,6 +11,7 @@ module.exports = (req, res, next) => {
   const outputPath = path.join('images', outputFilename);
 
   sharp(inputPath)
+    .rotate() // corriger l'orientation selon les métadonnées EXIF
     .resize(env.IMAGE_MAX_WIDTH || 463, env.IMAGE_MAX_HEIGHT || 595, { fit: 'inside', withoutEnlargement: true }) 
     .webp({ quality: env.IMAGE_QUALITY || 80 }) // qualité de compression   
     .toFile(outputPath)

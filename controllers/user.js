@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 exports.signup = (req, res, next) => {
-  bcrypt.hash(req.body.password, parseInt(process.env.SALT_ROUNDS))
+  bcrypt.hash(req.body.password, parseInt(process.env.SALT_ROUNDS) || 10)
     .then(hash => {
       const user = new User({
         email: req.body.email,
@@ -32,7 +32,7 @@ exports.login = (req, res, next) => {
             token: jwt.sign(
               { userId: user._id },
               process.env.TOKEN_SECRET,
-              { expiresIn: process.env.TOKEN_EXPIRES_IN }
+              { expiresIn: process.env.TOKEN_EXPIRES_IN || '24h'}
             )
           });
         })

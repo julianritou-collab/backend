@@ -53,7 +53,7 @@ exports.modifyBook = (req, res, next) => {
     Book.findOne({_id: req.params.id})
         .then((book) => {
             if (book.userId != req.auth.userId) {
-                res.status(401).json({ message : 'Not authorized'});
+                res.status(403).json({ message : 'Requête non autorisée'});
             } else {
                 if (req.file) {
                     // Supprimer l'ancienne image du serveur
@@ -62,7 +62,7 @@ exports.modifyBook = (req, res, next) => {
                 }
                 Book.updateOne({ _id: req.params.id}, { ...bookObject, _id: req.params.id})
                 .then(() => res.status(200).json({message : 'Livre modifié!'}))
-                .catch(error => res.status(401).json({ error }));
+                .catch(error => res.status(400).json({ error }));
             }
         })
         .catch((error) => {
@@ -74,13 +74,13 @@ exports.deleteBook = (req, res, next) => {
     Book.findOne({ _id: req.params.id})
     .then(book => {
       if (book.userId != req.auth.userId) {
-          res.status(401).json({ message : 'Not authorized'});
+          res.status(403).json({ message : 'Requête non autorisée'});
       } else {
           const filename = book.imageUrl.split('/images/')[1];
           fs.unlink(`images/${filename}`, () => { 
           Book.deleteOne({ _id: req.params.id})
               .then(() => res.status(200).json({ message: 'Livre supprimé !'}))
-              .catch(error => res.status(401).json({ error }));
+              .catch(error => res.status(400).json({ error }));
           });
       }
     })
@@ -94,7 +94,7 @@ exports.rateBook = (req, res, next) => {
     .then((book) => {
         const alreadyRated = book.ratings.some(rating => rating.userId === req.auth.userId);
         if (alreadyRated) {
-            return res.status(400).json({ message: 'Vous avez déjà noté ce livre.' });
+            return res.status(409).json({ message: 'Vous avez déjà noté ce livre.' });
         }
 
         book.ratings.push({ userId: req.auth.userId, grade: req.body.rating });

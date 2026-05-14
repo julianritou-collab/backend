@@ -12,10 +12,10 @@ module.exports = (req, res, next) => {
 
     // Lire en mémoire d'abord
     fs.readFile(inputPath, (err, buffer) => {
-        if (err) return () => {
-            err.source = 'fs.readFile';            
-            next(err);
-        };  
+        if (err) {
+            err.source = 'fs.readFile';
+            return next(err);
+        }
         // Supprimer le fichier tmp immédiatement pour éviter d'encombrer le serveur, même en cas d'erreur Sharp
         fs.unlink(inputPath, () => {});
 

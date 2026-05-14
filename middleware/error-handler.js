@@ -5,5 +5,8 @@ module.exports = (err, req, res, next) => {
   if (err.source === 'sharp') {
     return res.status(422).json({ error: 'Erreur Sharp lors de l\'optimisation de l\'image' });
   }
+  if (err.source === 'fs.readFile') {
+    return res.status(422).json({ error: 'Erreur lecture fichier temporaire' });
+  }
   res.status(500).json({ error: 'Erreur serveur' });
 };

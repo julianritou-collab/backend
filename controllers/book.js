@@ -56,6 +56,12 @@ exports.modifyBook = (req, res, next) => {
     } : { ...req.body };
  
     delete bookObject._userId;
+    const { title, author, year, genre } = bookObject;
+    if (!title?.trim() || !author?.trim() || !year || !genre?.trim()) {
+        if (req.file) fs.unlink(req.file.path, () => {});
+        return res.status(422).json({ message: 'Un ou plusieurs champs sont vides ou invalides' });
+    }
+
     Book.findOne({_id: req.params.id})
         .then((book) => {
             if (book.userId != req.auth.userId) {

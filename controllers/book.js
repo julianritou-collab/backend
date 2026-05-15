@@ -26,7 +26,13 @@ exports.createBook = (req, res, next) => {
     
     book.save()
     .then(() => { res.status(201).json({message: 'Livre enregistré !'})})
-    .catch(error => { res.status(400).json( { error })})
+    .catch(error => {
+        // Supprimer l'image du serveur en cas d'erreur lors de l'enregistrement du livre
+        const filename = book.imageUrl.split('/images/')[1];
+        fs.unlink(`images/${filename}`, () => {
+            res.status(400).json({ error });
+        });
+    });
 };
 
 exports.getOneBook = (req, res, next) => {
@@ -55,14 +61,20 @@ exports.modifyBook = (req, res, next) => {
             if (book.userId != req.auth.userId) {
                 res.status(403).json({ message : 'Requête non autorisée'});
             } else {
-                if (req.file) {
-                    // Supprimer l'ancienne image du serveur
-                    const filename = book.imageUrl.split('/images/')[1];
-                    fs.unlink(`images/${filename}`, () => {});
-                }
-                Book.updateOne({ _id: req.params.id}, { ...bookObject, _id: req.params.id})
-                .then(() => res.status(200).json({message : 'Livre modifié!'}))
-                .catch(error => res.status(400).json({ error }));
+                Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
+                .then(() => {
+                    // Supprimer l'ancienne image APRÈS succès de la mise à jour
+                    if (req.file) {
+                        const filename = book.imageUrl.split('/images/')[1];
+                        fs.unlink(`images/${filename}`, () => {});
+                    }
+                    res.status(200).json({ message: 'Livre modifié!' });
+                })
+                .catch(error => {
+                    // Supprimer la nouvelle image si la mise à jour échoue
+                    if (req.file) fs.unlink(req.file.path, () => {});
+                    res.status(400).json({ error });
+                });
             }
         })
         .catch((error) => {

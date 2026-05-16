@@ -28,8 +28,7 @@ exports.createBook = (req, res, next) => {
     .then(() => { res.status(201).json({message: 'Livre enregistré !'})})
     .catch(error => {
         // Supprimer l'image du serveur en cas d'erreur lors de l'enregistrement du livre
-        const filename = book.imageUrl.split('/images/')[1];
-        fs.unlink(`images/${filename}`, () => {
+        fs.unlink(req.file.path, () => {
             res.status(400).json({ error });
         });
     });
@@ -56,18 +55,19 @@ exports.modifyBook = (req, res, next) => {
     } : { ...req.body };
  
     delete bookObject._userId;
-    const { title, author, year, genre } = bookObject;
-    if (!title?.trim() || !author?.trim() || !year || !genre?.trim()) {
-        if (req.file) fs.unlink(req.file.path, () => {});
-        return res.status(422).json({ message: 'Un ou plusieurs champs sont vides ou invalides' });
-    }
-
+   
     Book.findOne({_id: req.params.id})
         .then((book) => {
             if (book.userId != req.auth.userId) {
+                // Supprimer la nouvelle image si l'utilisateur n'est pas autorisé à modifier le livre
+                if (req.file) fs.unlink(req.file.path, () => {});
                 res.status(403).json({ message : 'Requête non autorisée'});
             } else {
-                Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
+                Book.updateOne(
+                    { _id: req.params.id },
+                    { ...bookObject, _id: req.params.id },
+                    { runValidators: true }
+                )
                 .then(() => {
                     // Supprimer l'ancienne image APRÈS succès de la mise à jour
                     if (req.file) {
@@ -84,6 +84,8 @@ exports.modifyBook = (req, res, next) => {
             }
         })
         .catch((error) => {
+            // Supprimer la nouvelle image si la recherche du livre échoue
+            if (req.file) fs.unlink(req.file.path, () => {});
             res.status(400).json({ error });
         });
 };
@@ -95,11 +97,10 @@ exports.deleteBook = (req, res, next) => {
           res.status(403).json({ message : 'Requête non autorisée'});
       } else {
           const filename = book.imageUrl.split('/images/')[1];
-          fs.unlink(`images/${filename}`, () => { 
+          fs.unlink(`images/${filename}`, () => {});
           Book.deleteOne({ _id: req.params.id})
               .then(() => res.status(200).json({ message: 'Livre supprimé !'}))
-              .catch(error => res.status(400).json({ error }));
-          });
+              .catch(error => res.status(400).json({ error }));        
       }
     })
     .catch((error) => {

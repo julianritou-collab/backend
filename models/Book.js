@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { set } = require('../app');
 
 const ratingSchema = new mongoose.Schema({
   userId: { type: String, required: true },
@@ -7,11 +8,11 @@ const ratingSchema = new mongoose.Schema({
 
 const bookSchema = mongoose.Schema({
   userId: { type: String, required: true },
-  title: { type: String, required: true },
-  author: { type: String, required: true },
+  title: { type: String, required: true , set: (v) => v.trim()},
+  author: { type: String, required: true , set: (v) => v.trim()},
   imageUrl: { type: String, required: true },
   year: { type: Number, required: true },
-  genre: { type: String, required: true },
+  genre: { type: String, required: true , set: (v) => v.trim()},
   ratings: [ratingSchema],
   averageRating: { type: Number, required: true },
 });

@@ -15,7 +15,7 @@ exports.getAllBooks = (req, res, next) => {
 
 exports.createBook = (req, res, next) => {
     const bookobject = JSON.parse(req.body.book);
-    delete bookobject._userId;
+    delete bookobject.userId;
     const book = new Book({
         ...bookobject,
         userId: req.auth.userId,
@@ -54,7 +54,7 @@ exports.modifyBook = (req, res, next) => {
        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     } : { ...req.body };
  
-    delete bookObject._userId;
+    delete bookObject.userId;
    
     Book.findOne({_id: req.params.id})
         .then((book) => {
